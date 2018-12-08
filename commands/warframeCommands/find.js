@@ -1,7 +1,7 @@
 const request = require("request");
 const util = require("./util.js");
 
-module.exports.find = async(client,message,search) => {
+module.exports.run = async(client,message,search) => {
 
 	var apiTarget = 'https://api.warframe.market/v1/items';
 
