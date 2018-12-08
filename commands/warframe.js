@@ -58,6 +58,7 @@ module.exports.run = async(client, message, args) => {
 				message.channel.send("Commande inconnue.\nEffectuez `"+config.prefix+"warframe` pour afficher la liste des commandes disponibles pour Warframe.");
 			break;
 		}
+		Normalement ça devrait foirer
 	*/
 }
 
