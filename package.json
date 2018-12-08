@@ -1,0 +1,21 @@
+{
+  "name": "SillyBot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.4.2",
+    "fetch": "^1.1.0",
+    "https": "^1.0.0",
+    "isgd": "^1.1.3",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "warframe-worldstate-parser": "^2.1.24"
+  }
+}
