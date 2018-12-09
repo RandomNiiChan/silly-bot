@@ -61,7 +61,8 @@ client.on("message", (message) => {
 
 	if(command === "reload")
 	{
-		loadCmds();
+		loadGeneralCmds();
+		loadWarframeCmds();
 		message.channel.send(`meep morp commands reloaded`);
 	}
 
