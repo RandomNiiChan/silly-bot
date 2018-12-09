@@ -12,10 +12,12 @@ module.exports.run = async(client, message, args) => {
 	const ws = new WorldState(worldstateData);
 	//const market = require("./warframeCommands/marketPlace.js");
 
-	var element = args[0];
+	if(args[0].match(/sellers[0-9]*/gm)) var element = "sellers";
+	else var element = args[0];
 
-	if(!element) return message.channel.send(util.commandList());
-	
+	var cmd = client.warcommands.get(element);
+	if(cmd) cmd.run(client, message, args);
+	else message.channel.send("Erreur de commande");
 	/*
 		switch(element)
 		{
