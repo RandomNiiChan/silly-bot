@@ -4,15 +4,16 @@ const fs = require("fs");
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
+client.warcommands = new Discord.Collection();
 
-function loadCmds()
+function loadGeneralCmds()
 {
 	fs.readdir('./commands/', (err,files) => {
 		if(err) console.error(err);
 
 		var jsfiles = files.filter(f => f.split('.').pop() === 'js');
 		if(jsfiles.length <= 0) return console.log("No commands found.");
-		else console.log(jsfiles.length+" command files found.");
+		else console.log("===General commands===\n"+jsfiles.length+" command files found.");
 
 		jsfiles.forEach((f,i) => {
 			delete require.cache[require.resolve(`./commands/${f}`)];
@@ -20,12 +21,29 @@ function loadCmds()
 			var cmds = require(`./commands/${f}`);
 			client.commands.set(cmds.config.command, cmds);
 		});
-
-		console.log("===ALL COMMANDS WERE SUCCESSFULLY RELOADED===");
 	});
 }
 
-loadCmds();
+function loadWarframeCmds()
+{
+	fs.readdir('./commands/warframeCommands/', (err,files) => {
+		if(err) console.log(err);
+
+		var jsfiles = files.filter(f => f.split('.').pop() === 'js');
+		if(jsfiles.length <= 0) return console.log("No commands found.");
+		else console.log("===Warframe commands===\n"+jsfiles.length+" command files found.");
+
+		jsfiles.forEach((f,i) => {
+			delete require.cache[require.resolve(`./commands/warframeCommands/${f}`)];
+			console.log(`Command ${f} loading...`);
+			var cmds = require(`./commands/warframeCommands/${f}`);
+			client.warcommands.set(cmds.config.command, cmds);
+		});
+	});
+}
+
+loadGeneralCmds();
+loadWarframeCmds();
 
 client.on("ready", () => {
 	console.log("beep boop i am working");

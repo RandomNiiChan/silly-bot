@@ -17,3 +17,9 @@ module.exports.run = async(client,message,search) => {
 		}
 	});
 }
+
+module.exports.config = {
+	command: "find",
+	syntax: "find [objet à chercher]",
+	description: "Recherche un objet en vente sur le warframe market."
+}
