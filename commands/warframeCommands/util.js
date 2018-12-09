@@ -201,3 +201,12 @@ function sellingOrder(order)
 	return `[${seller.ingame_name} (${seller.reputation} rep) // ${statusTag}]\nPrix à l'unité: ${order.platinum}pl (stock: ${order.quantity})\n`;
 }
 module.exports.sellingOrder = sellingOrder;	
+
+module.exports.run = async(client, message, args) => {
+	//Cette commande doit rester vide
+	//C'est un fichier qui contient des commandes utiles
+}
+
+module.exports.config = {
+	command: "util"
+}
