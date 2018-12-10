@@ -66,7 +66,7 @@ function fissureInfo(fissure)
 	var string = `[${fissure.node} - Fissure ${fissure.tier} (T${fissure.tierNum})]\n`;
 	string+= `Type de mission: ${fissure.missionType} / Faction: ${fissure.enemy}\n`;
 	string+= `Active depuis ${fissure.startString.slice(1)}\n`;
-	string+= `Se ferme dans ${fissure.eta}\n\n`;
+	string+= `Se ferme dans ${fissure.eta}\n`;
 
 	return string;
 }
