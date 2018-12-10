@@ -8,8 +8,7 @@ module.exports.run = async(client, message, args) => {
 	//Déclaration des bases de données JSON
 	const config = require("../json/config.json");
 	//Déclaration de la requête URL
-	const worldstateData = await (require('request-promise'))('http://content.warframe.com/dynamic/worldState.php');
-	const ws = new WorldState(worldstateData);
+	
 	//const market = require("./warframeCommands/marketPlace.js");
 
 	if(args[0].match(/sellers[0-9]*/gm)) var element = "sellers";
@@ -18,6 +17,7 @@ module.exports.run = async(client, message, args) => {
 	var cmd = client.warcommands.get(element);
 	if(cmd) cmd.run(client, message, args);
 	else message.channel.send("Erreur de commande");
+	
 	/*
 		switch(element)
 		{

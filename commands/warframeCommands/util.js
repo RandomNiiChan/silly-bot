@@ -200,7 +200,7 @@ function sellingOrder(order)
 	var statusTag = (seller.status == "online" ? "En ligne" : "En jeu");
 	return `[${seller.ingame_name} (${seller.reputation} rep) // ${statusTag}]\nPrix à l'unité: ${order.platinum}pl (stock: ${order.quantity})\n`;
 }
-module.exports.sellingOrder = sellingOrder;	
+module.exports.sellingOrder = sellingOrder;
 
 module.exports.run = async(client, message, args) => {
 	//Cette commande doit rester vide
