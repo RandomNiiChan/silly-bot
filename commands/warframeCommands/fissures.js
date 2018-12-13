@@ -16,5 +16,7 @@ module.exports.run = async(client, message, args) => {
 }
 
 module.exports.config = {
-	command: "fissures"
+	command: "fissures",
+	description: "Affiche les fissures du Vide en cours sur Warframe.",
+	syntax: "fissures"
 }
