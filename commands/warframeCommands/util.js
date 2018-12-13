@@ -202,6 +202,16 @@ function sellingOrder(order)
 }
 module.exports.sellingOrder = sellingOrder;
 
+function helpCard(command)
+{
+	var conf = command.config;
+	return rootEmbed()
+	.setTitle(`Commande ${conf.command}`)
+	.setDescription(conf.description)
+	.addField("Syntaxe", config.prefix+"warframe "+conf.syntax);
+}
+module.exports.helpCard = helpCard;
+
 module.exports.run = async(client, message, args) => {
 	//Cette commande doit rester vide
 	//C'est un fichier qui contient des commandes utiles
