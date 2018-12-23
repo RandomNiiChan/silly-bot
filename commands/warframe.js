@@ -9,12 +9,13 @@ module.exports.run = async(client, message, args) => {
 	const config = require("../json/config.json");
 	//Déclaration de la requête URL
 
-	if(args[0].match(/sellers[0-9]*/gm)) var element = "sellers";
+	if(!args[0]) element = 'help';
+	else if(args[0].match(/sellers[0-9]*/gm)) var element = "sellers";
 	else var element = args[0];
 
 	var cmd = client.warcommands.get(element);
 	if(cmd) cmd.run(client, message, args);
-	else message.channel.send("Erreur de commande");
+	else message.channel.send("Commande inconnue.");
 }
 
 module.exports.config = {
