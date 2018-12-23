@@ -51,5 +51,7 @@ module.exports.run = async(client, message, args) => {
 }
 
 module.exports.config = {
-	command: "help"
+	command: "help",
+	syntax: "help [commande]",
+	description: "Affiche l'aide d'une commande warframe. Un peu comme ce que vous venez de faire."
 }
