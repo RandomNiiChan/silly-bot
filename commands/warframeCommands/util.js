@@ -15,6 +15,7 @@ function rootEmbed()
 {
 	var embed = new Discord.RichEmbed()
 	.setColor(config.embedColor);
+	//.setThumbnail("attachment://../../assets/warframe.png");
 	return embed;
 }
 module.exports.rootEmbed = rootEmbed;
@@ -37,21 +38,6 @@ function timeString(timeCode)
 	return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 module.exports.timeString = timeString;
-
-//Affiche la liste des commandes (refaire avec FS)
-function commandList()
-{
-	var embed = rootEmbed();
-	embed.setTitle("Liste des commandes Warframe");
-	embed.setDescription(`Voici la liste des commandes disponibles. Exécutez ${config.prefix}warframe [nom de la commande] !\n**ATTENTION: ces informations ne sont valables que pour la version PC.**`);
-	embed.addField("fissures","Affiche les détails des fissures en cours.");
-	embed.addField("voidtrader","Affiche les détails sur les allers et venues du marchand du néant.");
-	embed.addField("find", "Recherchez parmi les objets en vente sur le site warframe.market.");
-	embed.addField("sellers", "Affiche les annonces de vente d'un objet.");
-
-	return embed;
-}
-module.exports.commandList = commandList;
 
 //Convertit une string en asciidoc pour discord
 function convertAsciidoc(text)

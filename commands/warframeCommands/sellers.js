@@ -45,5 +45,5 @@ module.exports.run = async(client,message,args) => {
 module.exports.config = {
 	command: "sellers",
 	syntax: "sellers[numéro de page] [objet à rechercher]",
-	description: "affiche les ordres de vente pour un objet sur le warframe market.\n**ATTENTION:** \"sellers\" et le numéro de la page doivent être attachés.\n\n__Exemple:__ sellers2 affiche la deuxième page."
+	description: "Affiche les ordres de vente pour un objet sur le warframe market.\n**ATTENTION:** \"sellers\" et le numéro de la page doivent être attachés.\n\n__Exemple:__ sellers2 affiche la deuxième page."
 }
