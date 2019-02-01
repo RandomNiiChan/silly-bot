@@ -15,12 +15,15 @@ module.exports.run = async(client, message, args) => {
 				var prefix = "\*";
 			else if(config.prefix == "_")
 				var prefix = "\_";
+			else if(config.prefix == "`")
+				var prefix = "\`";
 			else
 				var prefix = config.prefix;
 			var embed = new Discord.RichEmbed()
 				.setColor(config.embedColor)
 				.setTitle(`${about.name}, ${about.description}`)
-				.setDescription(`Préfixe des commandes: ${config.prefix}\nEnvoyez **${config.prefix}[nom de la commande]** pour en apprendre plus sur celle-ci !`);
+				.setThumbnail("https://cdn.glitch.com/049db61c-f3f3-4185-9d81-b3fa8dc6cb22%2Ficon.png?1545664804309")
+				.setDescription(`Préfixe des commandes: ${config.prefix}\nEnvoyez **${config.prefix}help [nom de la commande]** pour en apprendre plus sur celle-ci !`);
 
 			jsfiles.forEach((f,i) => {
 				var command = f.split('.');
@@ -42,6 +45,7 @@ module.exports.run = async(client, message, args) => {
 				var configFile = command.config;
 				var embed = new Discord.RichEmbed()
 					.setColor(config.embedColor)
+					.setThumbnail("https://cdn.glitch.com/049db61c-f3f3-4185-9d81-b3fa8dc6cb22%2Ficon.png?1545664804309")
 					.setTitle(`Commande ${configFile.command}`)
 					.addField("Syntaxe", config.prefix+configFile.syntax)
 					.setDescription(configFile.description);
@@ -58,5 +62,5 @@ module.exports.run = async(client, message, args) => {
 module.exports.config = {
 	command: "help",
 	syntax: "help [nom de la commande]",
-	description: "Affiche l'aide de la commande passée en argument."
+	description: "Affiche l'aide de la commande passée en argument. Exactement comme ce que tu viens de faire, gros malin."
 }

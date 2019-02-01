@@ -1,6 +1,13 @@
 const config = require("../../json/config.json");
 const Discord = require("discord.js");
 
+function normalize(string)
+{
+	string = string.toLowerCase();
+	return string.charAt(0).toUpperCase() + string.substr(1);
+}
+module.exports.normalize = normalize;
+
 //Fonction auxilliaire pour la conversion des timestamp
 //Si le chiffre est inférieur à 9 on rajoute un 0 avant
 function twoDigits(number)
@@ -50,9 +57,7 @@ module.exports.convertAsciidoc = convertAsciidoc;
 function fissureInfo(fissure)
 {
 	var string = `[${fissure.node} - Fissure ${fissure.tier} (T${fissure.tierNum})]\n`;
-	string+= `Type de mission: ${fissure.missionType} / Faction: ${fissure.enemy}\n`;
-	string+= `Active depuis ${fissure.startString.slice(1)}\n`;
-	string+= `Se ferme dans ${fissure.eta}\n`;
+	string+= `${fissure.missionType} ${fissure.enemy} - Se ferme dans ${fissure.eta}\n\n`;
 
 	return string;
 }
@@ -184,7 +189,7 @@ function sellingOrder(order)
 {
 	var seller = order.user;
 	var statusTag = (seller.status == "online" ? "En ligne" : "En jeu");
-	return `[${seller.ingame_name} (${seller.reputation} rep) // ${statusTag}]\nPrix à l'unité: ${order.platinum}pl (stock: ${order.quantity})\n`;
+	return `[${seller.ingame_name} (${seller.reputation} rep) // ${statusTag}]\n    Prix à l'unité: ${order.platinum}pl (stock: ${order.quantity})\n`;
 }
 module.exports.sellingOrder = sellingOrder;
 
@@ -197,6 +202,19 @@ function helpCard(command)
 	.addField("Syntaxe", config.prefix+"warframe "+conf.syntax);
 }
 module.exports.helpCard = helpCard;
+
+function aboutAlert(alert,rank)
+{
+	if(alert.mission.description) var alertstring = `[${parseInt(rank)+1} - ${alert.mission.description} - ${alert.mission.type} ${alert.mission.faction} (${alert.eta} restant)]\n`;
+	else var alertstring = `[${parseInt(rank)+1} - ${alert.mission.type} ${alert.mission.faction} (${alert.eta} restant)]\n`;
+
+	var minlevel = alert.mission.minEnemyLevel;
+	var maxlevel = alert.mission.maxEnemyLevel;
+	alertstring += `${alert.mission.node} (niveaux ${minlevel}-${maxlevel}) / Récompense(s): ${alert.mission.reward.asString}\n\n`;
+
+	return alertstring;
+}
+module.exports.aboutAlert = aboutAlert;
 
 module.exports.run = async(client, message, args) => {
 	//Cette commande doit rester vide

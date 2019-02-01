@@ -6,7 +6,7 @@ module.exports.run = async(client, message, args) => {
 	var embed = new Discord.RichEmbed()
 	.setColor(config.embedColor)
 	.setTitle(`${about.name}, ${about.description}`)
-	.setDescription(`Créé par ${about.author}#${about.tag}.`)
+	.setDescription(`Créé par ${about.author}.`)
 	.addField("Version",about.version)
 	.addField("Moteur",about.engine);
 

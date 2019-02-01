@@ -1,7 +1,6 @@
 module.exports.run = async(client, message, args) => {
 	//Déclaration des modules à utiliser (NPM)
 	const Discord = require("discord.js");
-	const WorldState = require('warframe-worldstate-parser');
 	const fs = require("fs");
 	//Déclaration des modules à utiliser (custom)
 	const util = require("./warframeCommands/util.js");
@@ -20,6 +19,6 @@ module.exports.run = async(client, message, args) => {
 
 module.exports.config = {
 	command: "warframe",
-	syntax: "warframe {élément | optionnel}",
-	description: "Affiche l'état actuel du monde de Warframe sur PC."
+	syntax: "warframe {commande}",
+	description: "Affiche l'état actuel du monde de Warframe sur PC. Ne pas préciser de commande fait apparaître la liste des commandes disponibles."
 }
