@@ -83,6 +83,7 @@ client.on("message", (message) => {
 	{
 		loadGeneralCmds();
 		loadWarframeCmds();
+		loadMonsterHunterCmds();
 		message.channel.send(`meep morp commands reloaded`);
 	}
 

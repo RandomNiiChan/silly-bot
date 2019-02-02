@@ -1,6 +1,13 @@
 const config = require("../../json/config.json");
 const Discord = require("discord.js");
 
+function normalize(string)
+{
+	string = string.toLowerCase();
+	return string.charAt(0).toUpperCase() + string.substr(1);
+}
+module.exports.normalize = normalize;
+
 //Prend un array, et en extrait la x-ième page (la taille des page est à mettre en arguments)
 function arraySlicer(array,threshold,section)
 {
@@ -45,6 +52,25 @@ function convertAsciidoc(text)
 	return "```asciidoc\n"+text+"```";
 }
 module.exports.convertAsciidoc = convertAsciidoc;
+
+function filterResults(response, query)
+{
+	var regex = new RegExp(query.toLowerCase().replace(" ",".*"),'gm');
+	var array = response.filter(function(v) {
+		return v.name.toLowerCase().match(regex);
+	});
+	return array;
+}
+module.exports.filterResults = filterResults;
+
+function searchResults(results,search,type)
+{
+	if(results.length > 0) var res = `= ${results.length} ${type} matching "${search}" =\n\n`;
+	else return `No ${type} found for ${search}.`;
+	for(var i in results) res+=results[i].name+"\n";
+	return convertAsciidoc(res);
+}
+module.exports.searchResults = searchResults;
 
 module.exports.run = async(client, message, args) => {
 	//Cette commande doit rester vide

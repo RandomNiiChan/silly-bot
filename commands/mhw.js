@@ -10,7 +10,7 @@ module.exports.run = async(client, message, args) => {
 
 	if(!args[0]) element = 'help';
 	else if(args[0].match(/find(a|w|c|d|i|s)/gm)) var element = "find";
-	else if(args[0] === 'find') message.channel.send("Renseignez un élément à rechercher !");
+	else if(args[0] === 'find') return message.channel.send("Renseignez un élément à rechercher !");
 	else var element = args[0];
 
 	var cmd = client.mhwcommands.get(element);
@@ -21,5 +21,5 @@ module.exports.run = async(client, message, args) => {
 module.exports.config = {
 	command: "mhw",
 	syntax: "mhw {commande}",
-	description: "Renseignez une commande pour obtenir des utilitaires en rapport avec Monster Hunter World. Ne pas préciser de commande fait apparaître la liste des commandes disponibles."
+	description: "Renseignez une commande pour accéder à des utilitaires en rapport avec Monster Hunter World. Ne pas préciser de commande fait apparaître la liste des commandes disponibles."
 }

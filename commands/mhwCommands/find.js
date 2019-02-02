@@ -1,12 +1,13 @@
 const request = require("request");
 const util = require("./util.js");
+const Discord = require("discord.js");
 
 //module.exports.run = async(client,message,search) => {
 module.exports.run = async(client,message,args) => {
 	//gestion des erreurs
 	var type = util.queryType(args[0]);
-	if(!type) return message.channel.send("Mauvais filtre !");
-	if(!args[1]) return message.channel.send("Renseignez une recherche !");
+	if(!type) return message.channel.send("This filter is unsupported !");
+	if(!args[1]) return message.channel.send("Please input a query !");
 	//endpoint et recherche
 	var apiEndpoint = "https://mhw-db.com/"+type+"/";
 	var search = util.stringifyArray(args.slice(1));
@@ -14,11 +15,13 @@ module.exports.run = async(client,message,args) => {
 	request(apiEndpoint, function(error, response, body){
 		if (!error && response.statusCode == 200) {
 			var data = JSON.parse(body);
-			message.channel.send("Ok");
+			var results = util.filterResults(data,search);
+
+			message.channel.send(util.searchResults(results,search,type));
 		}
 		else {
 			console.log(error);
-			message.channel.send("Une erreur s'est produite lors de l'accès à mhw-db.com.");
+			message.channel.send("An error has occured while accessing the database.");
 		}
 	});
 }
