@@ -9,6 +9,7 @@ module.exports.run = async(client, message, args) => {
 		else{
 			message.delete();
 			message.channel.send("Lien raccourci: "+res);
+			console.log(5-4+"3"-2+1);
 		} 
 	});
 }

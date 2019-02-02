@@ -5,6 +5,7 @@ const fs = require("fs");
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 client.warcommands = new Discord.Collection();
+client.mhwcommands = new Discord.Collection();
 
 function loadGeneralCmds()
 {
@@ -12,7 +13,7 @@ function loadGeneralCmds()
 		if(err) console.error(err);
 
 		var jsfiles = files.filter(f => f.split('.').pop() === 'js');
-		if(jsfiles.length <= 0) return console.log("No commands found.");
+		if(jsfiles.length <= 0) return console.log("No general commands found.");
 		else console.log("===General commands===\n"+jsfiles.length+" command files found.");
 
 		jsfiles.forEach((f,i) => {
@@ -30,7 +31,7 @@ function loadWarframeCmds()
 		if(err) console.log(err);
 
 		var jsfiles = files.filter(f => f.split('.').pop() === 'js');
-		if(jsfiles.length <= 0) return console.log("No commands found.");
+		if(jsfiles.length <= 0) return console.log("No warframe commands found.");
 		else console.log("===Warframe commands===\n"+jsfiles.length+" command files found.");
 
 		jsfiles.forEach((f,i) => {
@@ -42,8 +43,27 @@ function loadWarframeCmds()
 	});
 }
 
+function loadMonsterHunterCmds()
+{
+	fs.readdir('./commands/mhwCommands/', (err,files) => {
+		if(err) console.log(err);
+
+		var jsfiles = files.filter(f=>f.split('.').pop() === 'js');
+		if(jsfiles.length <= 0) return console.log("No MHW commands found.");
+		else console.log("===MHW commands===\n"+jsfiles.length+" command files found.");
+
+		jsfiles.forEach((f,i) => {
+			delete require.cache[require.resolve(`./commands/mhwCommands/${f}`)];
+			console.log(`Command ${f} loading...`);
+			var cmds = require(`./commands/mhwCommands/${f}`);
+			client.mhwcommands.set(cmds.config.command, cmds);
+		});
+	});
+}
+
 loadGeneralCmds();
 loadWarframeCmds();
+loadMonsterHunterCmds();
 
 client.on("ready", () => {
 	console.log("beep boop i am working");

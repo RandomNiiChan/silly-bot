@@ -9,15 +9,9 @@ module.exports.run = async(client, message, args) => {
 	{
 		var cmd = client.warcommands.get(args[1]);
 		//Si c'est util, ça foire
-		if(args[1] == "util" || !cmd)
-		{
-			message.channel.send("Commande inconnue !");
-		}
+		if(args[1] == "util" || !cmd) message.channel.send("Commande inconnue !");
 		//Si la commande existe
-		else
-		{
-			message.channel.send(util.helpCard(cmd));
-		}
+		else message.channel.send(util.helpCard(cmd));
 	}
 	//Sinon on affiche la liste des commandes
 	else
