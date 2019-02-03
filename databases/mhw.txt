@@ -1,0 +1,27 @@
+BEGIN TRANSACTION;
+CREATE TABLE IF NOT EXISTS "LoadoutUserLinked" (
+	"userId"	INTEGER NOT NULL,
+	"loadoutId"	INTEGER NOT NULL,
+	PRIMARY KEY("userId","loadoutId")
+);
+CREATE TABLE IF NOT EXISTS "Loadout" (
+	"id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	"name"	TEXT,
+	"customWeaponId"	INTEGER,
+	"head"	INTEGER,
+	"chest"	INTEGER,
+	"gloves"	INTEGER,
+	"waist"	INTEGER,
+	"legs"	INTEGER,
+	"charm"	INTEGER
+);
+CREATE TABLE IF NOT EXISTS "User" (
+	"id"	INTEGER NOT NULL,
+	PRIMARY KEY("id")
+);
+CREATE TABLE IF NOT EXISTS "Wishlist" (
+	"userId"	INTEGER NOT NULL,
+	"itemId"	INTEGER NOT NULL,
+	PRIMARY KEY("userId","itemId")
+);
+COMMIT;
