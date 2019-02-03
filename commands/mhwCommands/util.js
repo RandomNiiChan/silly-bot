@@ -72,6 +72,18 @@ function searchResults(results,search,type)
 }
 module.exports.searchResults = searchResults;
 
+function nameToSlug(string)
+{
+	return string.toLowerCase().replace(' ','-');
+}
+module.exports.nameToSlug = nameToSlug;
+
+function argsToSlug(array)
+{
+	return nameToSlug(stringifyArray(array));
+}
+module.exports.argsToSlug = argsToSlug;
+
 module.exports.run = async(client, message, args) => {
 	//Cette commande doit rester vide
 	//C'est un fichier qui contient des commandes utiles
