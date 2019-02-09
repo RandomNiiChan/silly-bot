@@ -16,7 +16,8 @@ module.exports.run = async(client,message,args) => {
 			{
 				var arrayName = args.slice(2);
 				var loadoutName = util.stringifyArray(arrayName).toLowerCase();
-				console.log(loadoutName);
+				var loadout = new Loadout(loadoutName, message.author);
+				loadout.registerLoadout(loadoutsDatabase);
 			}
 		break;
 
@@ -36,13 +37,8 @@ module.exports.run = async(client,message,args) => {
 				rows.forEach((row) => {
 					list+=Loadout.rowToString(row);
 				});
-
 				message.channel.send(util.convertAsciidoc(list));
 			});
-		break;
-
-		case 'debug':
-			var sql = "SELECT * FROM sqlite_master WHERE tbl_name='Loadouts'";
 		break;
 
 		default:
