@@ -25,6 +25,10 @@ class Loadout {
 	toString() {
 		return `${this.userId} - ${this.name} - ${this.id}`;
 	}
+
+	static rowToString(row) {
+		return `${row.name} - Contient: xxx, xxx, xxx\n`;
+	}
 }
 
 module.exports = {

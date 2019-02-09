@@ -6,7 +6,7 @@ const classes = require("./classes.js");
 const Loadout = classes.Loadout;
 
 module.exports.run = async(client,message,args) => {
-	var loadoutsDatabase = new sqlite3.Database('../../databases/mhw.sqlite');
+	var loadoutsDatabase = new sqlite3.Database('./databases/mhw.sqlite');
 	var action = args[1];
 	switch(action)
 	{
@@ -25,8 +25,24 @@ module.exports.run = async(client,message,args) => {
 		break;
 
 		case 'list':
-			var test = new Loadout("albert",message.author);
-			message.channel.send(test.toString());
+			var sql = 'SELECT * FROM Loadouts WHERE userId = ?';
+			if(message.mentions.users.first()) var id = message.mentions.users.first().id;
+			else var id = message.author.id;
+			var list = `= ${message.author.username}'s Loadouts =\n\n`;
+
+			loadoutsDatabase.all(sql, id, (err,rows) => {
+				if(err) throw err;
+				if(!rows) list+="You do not have any loadouts yet !"
+				rows.forEach((row) => {
+					list+=Loadout.rowToString(row);
+				});
+
+				message.channel.send(util.convertAsciidoc(list));
+			});
+		break;
+
+		case 'debug':
+			var sql = "SELECT * FROM sqlite_master WHERE tbl_name='Loadouts'";
 		break;
 
 		default:
