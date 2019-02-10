@@ -17,12 +17,15 @@ module.exports.run = async(client,message,args) => {
 				var arrayName = args.slice(2);
 				var loadoutName = util.stringifyArray(arrayName).toLowerCase();
 				var loadout = new Loadout(loadoutName, message.author);
-				loadout.registerLoadout(loadoutsDatabase);
+				
+				loadoutsDatabase.get("SELECT COUNT(loadoutId) FROM Loadouts WHERE userId = ?", [loadout.userId], function(err, result) {
+					if(result['COUNT(loadoutId)'] >= 5) return message.channel.send("You already have 5 loadouts. Please consider deleting one !");
+					else {
+						loadout.registerLoadout(loadoutsDatabase);
+						message.channel.send("You created a new loadout: "+loadout.name);
+					} 
+				});
 			}
-		break;
-
-		case 'delete':
-			
 		break;
 
 		case 'list':
@@ -41,8 +44,28 @@ module.exports.run = async(client,message,args) => {
 			});
 		break;
 
+		case 'debug':
+			var embed = new Discord.RichEmbed()
+			.setTitle("Test")
+			.addField("yes","```test\ntest\ntest```");
+			message.channel.send(embed);
+		break;
+
+		/* TODO
+		case 'note':
+			if(!args[2]) message.channel.send("Please input a note for your loadout !");
+			else {
+				var loadoutNote = util.stringifyArray(args.slice(2));
+				if(loadoutNote.length > 140) return message.channel.send("This note is too long. Please note that the maximal length for a note is 140 characters !");
+				else {
+
+				}
+			}
+		break;
+		*/
+
 		default:
-			message.channel.send("Samarchpa");
+			message.channel.send("Unknown loadout command.");
 		break;
 	}
 
@@ -51,6 +74,6 @@ module.exports.run = async(client,message,args) => {
 
 module.exports.config = {
 	command: "loadout",
-	syntax: 'loadout {create|delete} (loadout name)',
-	description: "Recherche un objet du jeu. Il faut renseigner le type d'objet à rechercher juste à côté de find."
+	syntax: 'loadout {create|delete|rename|note} (loadout name) [note|new loadout name]',
+	description: "Creates a MHW loadout. You can edit its note or its name after its original name."
 }

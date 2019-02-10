@@ -7,16 +7,7 @@ class Loadout {
 	constructor(name, user) {
 		this.userId = user.id;
 		this.name = name;
-		this.id = this.generateId();
 		this.note = " ";
-	}
-
-	get id() {
-		return this._id;
-	}
-
-	set id(id) {
-		this._id = id;
 	}
 
 	get userId() {
@@ -35,17 +26,16 @@ class Loadout {
 		this._note = note;
 	}
 
-	generateId() {
-		return Math.floor(Math.random()*16777215).toString(16);
-	}
-
-	toString() {
-		return `${this.userId} - ${this.name} - ${this.id}`;
+	checkLoadoutNumber(database) {
+		database.get("SELECT COUNT(loadoutId) FROM Loadouts WHERE userId = ?", [this.userId], function(err, result) {
+			console.log(result['COUNT(loadoutId)']);
+		});
 	}
 
 	registerLoadout(database) {
-		var argsArray = [this.userId,this.name];
-		database.run("INSERT INTO Loadouts(userId,name) VALUES(?,?)", argsArray, function(err) {
+		this.checkLoadoutNumber(database);
+		var argsArray = [this.userId,this.name,this.note];
+		database.run("INSERT INTO Loadouts(userId,name,note) VALUES(?,?,?)", argsArray, function(err) {
 			if(err) return console.log(err.message);
 			console.log(`Insertion d'un loadout. Id: ${this.lastID}`);
 		});
