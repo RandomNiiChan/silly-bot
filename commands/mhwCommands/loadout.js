@@ -14,16 +14,14 @@ module.exports.run = async(client,message,args) => {
 			if(!args[2]) message.channel.send("Please input a name for your loadout !");
 			else
 			{
-				var arrayName = args.slice(2);
-				var loadoutName = util.stringifyArray(arrayName).toLowerCase();
+				var loadoutName = args[2];
 				var loadout = new Loadout(loadoutName, message.author);
 				
-				loadoutsDatabase.get("SELECT COUNT(loadoutId) FROM Loadouts WHERE userId = ?", [loadout.userId], function(err, result) {
+				loadoutsDatabase.get("SELECT COUNT(name) FROM Loadouts WHERE userId = ?", [loadout.userId], function(err, result) {
 					if(result['COUNT(loadoutId)'] >= 5) return message.channel.send("You already have 5 loadouts. Please consider deleting one !");
 					else {
-						loadout.registerLoadout(loadoutsDatabase);
-						message.channel.send("You created a new loadout: "+loadout.name);
-					} 
+						loadout.registerLoadout(loadoutsDatabase,message.channel);
+					}
 				});
 			}
 		break;
@@ -36,7 +34,7 @@ module.exports.run = async(client,message,args) => {
 
 			loadoutsDatabase.all(sql, id, (err,rows) => {
 				if(err) throw err;
-				if(!rows) list+="You do not have any loadouts yet !"
+				if(rows.length == 0) list+="You do not have any loadouts yet !"
 				rows.forEach((row) => {
 					list+=Loadout.rowToString(row);
 				});
@@ -51,18 +49,41 @@ module.exports.run = async(client,message,args) => {
 			message.channel.send(embed);
 		break;
 
-		/* TODO
 		case 'note':
-			if(!args[2]) message.channel.send("Please input a note for your loadout !");
+			if(!args[2]) return message.channel.send("Please enter the name of the loadout whose label you want to change.");
 			else {
-				var loadoutNote = util.stringifyArray(args.slice(2));
-				if(loadoutNote.length > 140) return message.channel.send("This note is too long. Please note that the maximal length for a note is 140 characters !");
-				else {
+				//Entrer le nom du loadout
+				var name = args[2];
 
-				}
+				//Commencer la collecte
+				message.channel.send("Please input the new loadout note.");
+				const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 20000 });
+
+				//récupération d'un message
+				collector.on('collect', msg => {
+					loadoutsDatabase.run("UPDATE Loadouts SET note = ? WHERE userId = ? AND ");
+					// var loadoutsDatabase = new sqlite3.Database('./databases/mhw.sqlite');
+					// var note = msg.content;
+					// if(note.length>140) return message.channel.send("Your note iss too long: please input a note shorter than 140 characters.");
+					// if(note.toLowerCase() === "stop") collector.stop("abort");
+					// loadoutsDatabase.run("UPDATE Loadouts SET note = ? WHERE userId = ? AND ", [note,msg.author]);
+					// message.channel.send(`Updated ${loadout}'s note: new note is [${note}]`);
+					collector.stop();
+				});
+
+				//Fin de collecte
+				collector.on('end', (collected, reason) => {
+					if(reason == 'time') message.channel.send("You took too much time to write your note. This action has been cancelled.");
+					else if(reason == 'abort') message.channel.send("Operation aborted.");
+					else {
+						message.channel.send("An unexpected error has occured.");
+						console.log(reason);
+					}
+				});
 			}
 		break;
-		*/
+
+
 
 		default:
 			message.channel.send("Unknown loadout command.");
@@ -75,5 +96,5 @@ module.exports.run = async(client,message,args) => {
 module.exports.config = {
 	command: "loadout",
 	syntax: 'loadout {create|delete|rename|note} (loadout name) [note|new loadout name]',
-	description: "Creates a MHW loadout. You can edit its note or its name after its original name."
+	description: "Creates a MHW loadout. You can edit its note or its name after its original name.\n**Warning: the name of the loadout is limited to one word.**"
 }

@@ -7,7 +7,7 @@ class Loadout {
 	constructor(name, user) {
 		this.userId = user.id;
 		this.name = name;
-		this.note = " ";
+		this.note = "";
 	}
 
 	get userId() {
@@ -26,18 +26,17 @@ class Loadout {
 		this._note = note;
 	}
 
-	checkLoadoutNumber(database) {
-		database.get("SELECT COUNT(loadoutId) FROM Loadouts WHERE userId = ?", [this.userId], function(err, result) {
-			console.log(result['COUNT(loadoutId)']);
-		});
-	}
-
-	registerLoadout(database) {
-		this.checkLoadoutNumber(database);
+	registerLoadout(database, channel) {
 		var argsArray = [this.userId,this.name,this.note];
-		database.run("INSERT INTO Loadouts(userId,name,note) VALUES(?,?,?)", argsArray, function(err) {
-			if(err) return console.log(err.message);
-			console.log(`Insertion d'un loadout. Id: ${this.lastID}`);
+
+		database.get("SELECT * FROM Loadouts WHERE userId = ? AND name = ?",[this.userId,this.name], function(err, row) {
+			if(!row) 
+				database.run("INSERT INTO Loadouts(userId,name,note) VALUES(?,?,?)", argsArray, function(err) {
+					if(err) return console.log(err.message);
+					console.log(`Insertion d'un loadout`);
+					channel.send("You created a new loadout: "+argsArray[1]);
+				});
+			else channel.send("You already created a loadout using this name.");
 		});
 	}
 
