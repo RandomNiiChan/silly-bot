@@ -80,6 +80,11 @@ function loadMonsterHunterCmds() {
 	});
 }
 
+function initUser(userId) {
+	var profiles = client.databases.get("profiles");
+	profiles.run("INSERT INTO Users(userId,level,xp,nextLevel,credits,bio) VALUES(?,?,?,?,?,?)",[userId,1,0,10,0,"I have no description yet."]);
+}
+
 loadGeneralCmds();
 loadWarframeCmds();
 loadMonsterHunterCmds();
@@ -100,7 +105,7 @@ client.on("message", (message) => {
 
 	var profiles = client.databases.get("profiles");
 
-	//Mise à jour de l'XP
+	//Mise à jour de l'XP et du niveau
 	profiles.get('SELECT * FROM Users WHERE userId = ?', [message.author.id], (err,row) => {
 		//on regarde si l'utilisateur existe dans la table
 		if(row) {
@@ -112,12 +117,11 @@ client.on("message", (message) => {
 		}
 		else {
 			console.log(`Inserting ${message.author.tag} (${message.author.id}) into the database.`);
-			profiles.run("INSERT INTO Users(userId,level,xp,nextLevel,credits,bio) VALUES(?,?,?,?,?,?)",[message.author.id,1,0,10,0,"I have no description yet."]);
+			initUser(message.author.id);
 		}
 	});
 
 	//Gestion du texte des messages
-
 	if(command === "reload") {
 		loadGeneralCmds();
 		loadWarframeCmds();
