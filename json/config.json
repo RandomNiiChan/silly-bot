@@ -4,5 +4,6 @@
 	"embedColor": "0xFFFFFF",
 	"embedColorError": "0xF44242",
 	"botGame": "faire des bip et des boup",
-	"inviteLink": "https://discordapp.com/api/oauth2/authorize?client_id=511899289492914178&permissions=2146561143&scope=bot"
+	"inviteLink": "https://discordapp.com/api/oauth2/authorize?client_id=511899289492914178&permissions=2146561143&scope=bot",
+	"currency": "$"
 }

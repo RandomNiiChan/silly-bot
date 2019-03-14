@@ -13,8 +13,8 @@ module.exports.run = async(client, message, args) => {
 	profiles.get("SELECT * FROM Users WHERE userId = ?",[user.id], (err,row) => {
 		embed.setTitle(user.tag);
 		embed.setDescription(row.bio);
-		embed.addField("Niveau "+row.level, "XP: "+row.xp+"/"+row.nextLevel);
-		embed.addField("Porte-monnaie",row.credits+"$");
+		embed.addField("Level "+row.level, "XP: "+row.xp+"/"+row.nextLevel);
+		embed.addField("Balance",row.credits+" "+config.currency);
 		embed.setThumbnail(user.avatarURL);
 
 		message.channel.send(embed);
