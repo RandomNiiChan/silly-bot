@@ -5,6 +5,8 @@ module.exports.run = async(client, message, args) => {
 	const config = require("../../json/config.json");
 
 	//Si il y a un argument après "help"
+	const forbiddenCommands = ["util.js"];
+
 	if(args[1])
 	{
 		var cmd = client.warcommands.get(args[1]);
@@ -20,7 +22,7 @@ module.exports.run = async(client, message, args) => {
 			if(err) console.error(err);
 
 			//Liste des commandes, sans util.js
-			var jsfiles = files.filter(f => f.split('.').pop() === 'js' && f.split('.')[0] != 'util');
+			var jsfiles = files.filter(f => f.split('.').pop() === 'js' && (f.split('.')[0] != 'util' || f.split('.')[0] != 'classes'));
 
 			var commandList = "";
 
@@ -34,7 +36,7 @@ module.exports.run = async(client, message, args) => {
 
 			jsfiles.forEach((f,i) => {
 				var command = f.split('.');
-				commandList+=command[0]+"\n";
+				if(!forbiddenCommands.includes(f)) commandList+=command[0]+"\n";
 			});
 
 			embed.addField("Liste des commandes",commandList);

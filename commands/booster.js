@@ -17,7 +17,8 @@ module.exports.run = async(client, message, args) => {
 	switch(mode)
 	{
 		case 'buy':
-			iManager.buyBooster(message.channel, booster);
+			if(!booster) message.channel.send("Please input a booster to buy.");
+			else iManager.buyBooster(message.channel, booster);
 		break;
 
 		case 'list':
@@ -25,11 +26,12 @@ module.exports.run = async(client, message, args) => {
 		break;
 
 		case 'inspect':
-			bManager.inspect(message.channel,booster);
+			if(!booster) message.channel.send("Please input a booster to inspect.");
+			else bManager.inspect(message.channel,booster);
 		break;
 
 		default:
-			message.channel.send("Unknown command");
+			message.channel.send("Unknown booster command.");
 		break;
 	}
 }

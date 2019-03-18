@@ -39,9 +39,13 @@ function loadGeneralCmds() {
 
 		jsfiles.forEach((f,i) => {
 			delete require.cache[require.resolve(`./commands/${f}`)];
-			console.log(`Command ${f} loading...`);
-			var cmds = require(`./commands/${f}`);
-			client.commands.set(cmds.config.command, cmds);
+			
+			if(f == "classes.js" || f == "util.js") console.log("BEEP BEEP");
+			else {
+				console.log(`Command ${f} loading...`);
+				var cmds = require(`./commands/${f}`);
+				client.commands.set(cmds.config.command, cmds);
+			}
 		});
 	});
 }
@@ -56,9 +60,13 @@ function loadWarframeCmds() {
 
 		jsfiles.forEach((f,i) => {
 			delete require.cache[require.resolve(`./commands/warframeCommands/${f}`)];
-			console.log(`Command ${f} loading...`);
-			var cmds = require(`./commands/warframeCommands/${f}`);
-			client.warcommands.set(cmds.config.command, cmds);
+
+			if(f == "classes.js" || f == "util.js") console.log("BEEP BEEP");
+			else {
+				console.log(`Command ${f} loading...`);
+				var cmds = require(`./commands/warframeCommands/${f}`);
+				client.warcommands.set(cmds.config.command, cmds);
+			}
 		});
 	});
 }
@@ -73,9 +81,13 @@ function loadMonsterHunterCmds() {
 
 		jsfiles.forEach((f,i) => {
 			delete require.cache[require.resolve(`./commands/mhwCommands/${f}`)];
-			console.log(`Command ${f} loading...`);
-			var cmds = require(`./commands/mhwCommands/${f}`);
-			client.mhwcommands.set(cmds.config.command, cmds);
+
+			if(f == "classes.js" || f == "util.js") console.log("BEEP BEEP");
+			else {
+				console.log(`Command ${f} loading...`);
+				var cmds = require(`./commands/mhwCommands/${f}`);
+				client.mhwcommands.set(cmds.config.command, cmds);	
+			}
 		});
 	});
 }
@@ -111,7 +123,7 @@ client.on("message", (message) => {
 		if(row) {
 			profiles.run(`UPDATE Users SET xp = ${row.xp+1} WHERE userId = ?`, [message.author.id]);
 			if(row.xp+1 >= row.nextLevel) {
-				profiles.run("UPDATE Users SET level = ?, nextLevel = ? WHERE userId = ?",[row.level+1, ((row.level+1)^2)*10, message.author.id]);
+				profiles.run("UPDATE Users SET level = ?, nextLevel = ?, xp = 0 WHERE userId = ?",[row.level+1, ((row.level+1)^2)*10, message.author.id]);
 				message.reply(`You advanced to the level ${row.level+1}! Congratulations!`);
 			}
 		}
