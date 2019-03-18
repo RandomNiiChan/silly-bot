@@ -5,6 +5,8 @@ module.exports.run = async(client, message, args) => {
 	const config = require("../json/config.json");
 	const about = require("../json/about.json");
 
+	const forbiddenCommands = ["util.js","classes.js"];
+
 	if(!args[0])
 	{
 		fs.readdir('./commands/', (err,files) => {
@@ -27,7 +29,7 @@ module.exports.run = async(client, message, args) => {
 
 			jsfiles.forEach((f,i) => {
 				var command = f.split('.');
-				commandList+=command[0]+"\n";
+				if(!forbiddenCommands.includes(f)) commandList+=command[0]+"\n";
 			});
 
 			embed.addField("Liste des commandes",commandList);

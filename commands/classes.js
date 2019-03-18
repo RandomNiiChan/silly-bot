@@ -63,16 +63,23 @@ class InventoryManager extends Manager {
 	}
 
 	buyBooster(channel,boosterId) {
+		//récupérer le booster
 		this.database.get("SELECT * FROM Boosters WHERE boosterId = ?",[boosterId], (err,rowB) => {
+			//Si il n'existe pas
 			if(!rowB) return channel.send("This booster doesn't exist.");
 			this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
+				//Si assez de crédits
 				if(row.credits >= rowB.price) {
 					this.editBalance(-rowB.price);
 					this.insertIntoInventory(boosterId,1,"booster");
-					channel.send(`You bought ${rowB.name} for ${rowB.price} ${config.currency}.`);
+					//conjugaison
+					if(rowB.name.match(/^(a|e|i|o|u|y|A|E|I|O|U|Y).*/gm))
+						channel.send(`You bought an ${rowB.name} booster for ${rowB.price} ${config.currency}.`);
+					else 
+						channel.send(`You bought a ${rowB.name} booster for ${rowB.price} ${config.currency}.`);
 				}
 				else {
-					return channel.send("You don't have enough credits.");
+					return channel.send("You don't have enough "+config.currency+".");
 				}					
 			});
 		});
@@ -82,6 +89,7 @@ class InventoryManager extends Manager {
 module.exports.run = async(client, message, args) => {
 	//Cette commande doit rester vide
 	//C'est un fichier qui contient des commandes utiles
+	message.channel.send("ALEEEEEED");
 }
 
 module.exports = {
