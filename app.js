@@ -133,6 +133,8 @@ client.on("message", (message) => {
 		}
 	});
 
+	if (!message.content.startsWith(prefix)) return;
+
 	//Gestion du texte des messages
 	if(command === "reload") {
 		loadGeneralCmds();
