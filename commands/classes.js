@@ -84,6 +84,43 @@ class InventoryManager extends Manager {
 			});
 		});
 	}
+
+	viewInventory(channel,mode) {
+		switch(mode) {
+			case "booster":
+				var sql = "SELECT * FROM Inventory I JOIN Boosters B ON B.boosterId = I.itemId WHERE I.userId = ? AND I.type = ?";
+			break;
+
+			case "doggo": 
+				var sql = "SELECT * FROM Inventory I JOIN Doggos D ON I.itemId = D.doggoId WHERE I.userId = ? AND I.type = ?";
+			break;
+
+			default:
+				mode = "doggo";
+				var sql = "SELECT * FROM Inventory I JOIN Doggos D ON I.itemId = D.doggoId WHERE I.userId = ? AND I.type = ?";
+			break;
+		}
+
+		this.database.all(sql, [this.ownerId,mode], (err,rows) => {
+			if(err) throw err;
+
+			var list = "= Your "+mode+" inventory =\n\n"
+
+			rows.forEach((row) => {
+				if(mode == "doggo") list+=`${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}\n\n`;
+				else if(mode = "booster") list+=`${row.name} (collection ${row.collection}) :: ${row.price}${config.currency}`;
+			});
+
+			channel.send(Manager.asciiDoc(list));
+		});
+	}
+}
+
+class DoggoManager extends Manager {
+	constructor(database,ownerId) {
+		super(database);
+		this.ownerId = ownerId;
+	}
 }
 
 module.exports.run = async(client, message, args) => {
@@ -95,7 +132,8 @@ module.exports.run = async(client, message, args) => {
 module.exports = {
 	Manager : Manager,
 	BoosterManager : BoosterManager,
-	InventoryManager : InventoryManager
+	InventoryManager : InventoryManager,
+
 }
 
 module.exports.config = {
