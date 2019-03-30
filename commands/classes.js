@@ -8,6 +8,16 @@ class Manager {
 	static asciiDoc(text) {
 		return "```asciidoc\n"+text+"```";
 	}
+
+	static sliceArray(array,threshold,section) {
+		if(array.length>threshold)
+		{
+			var maxSection = Math.floor(array.length/threshold);
+			if(section > maxSection) return false;
+			else return array.slice(threshold*section, threshold*(section+1));
+		}
+		else return array;
+	}
 }
 
 class BoosterManager extends Manager{
@@ -36,6 +46,10 @@ class BoosterManager extends Manager{
 
 			channel.send(Manager.asciiDoc(string));
 		});
+	}
+
+	static boosterToAsciiString(row) {
+		return `${row.name} (collection ${row.collection}) :: ${row.price}${config.currency}`;
 	}
 }
 
@@ -85,34 +99,42 @@ class InventoryManager extends Manager {
 		});
 	}
 
-	viewInventory(channel,mode) {
-		switch(mode) {
-			case "booster":
-				var sql = "SELECT * FROM Inventory I JOIN Boosters B ON B.boosterId = I.itemId WHERE I.userId = ? AND I.type = ?";
-			break;
+	viewInventory(channel,mode,page,threshold) {
+		if(mode=="doggo") {
+			var sql = "SELECT * FROM Inventory I JOIN Doggos D ON I.itemId = D.doggoId WHERE I.userId = ? AND I.type = ?";
+			this.database.all(sql, [this.ownerId,mode], (err,rows) => {
+				
+				var maxPage = Math.ceil(rows.length/threshold);
+				page = maxPage<page ? maxPage : page;
+				
+				var list = "= Your doggo inventory (Page "+page+"/"+maxPage+")=\n\n";
+				rows = Manager.sliceArray(rows,threshold,page-1);
 
-			case "doggo": 
-				var sql = "SELECT * FROM Inventory I JOIN Doggos D ON I.itemId = D.doggoId WHERE I.userId = ? AND I.type = ?";
-			break;
+				rows.forEach((row) => {
+					list+=`${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}\n\n`;
+				});
 
-			default:
-				mode = "doggo";
-				var sql = "SELECT * FROM Inventory I JOIN Doggos D ON I.itemId = D.doggoId WHERE I.userId = ? AND I.type = ?";
-			break;
-		}
-
-		this.database.all(sql, [this.ownerId,mode], (err,rows) => {
-			if(err) throw err;
-
-			var list = "= Your "+mode+" inventory =\n\n"
-
-			rows.forEach((row) => {
-				if(mode == "doggo") list+=`${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}\n\n`;
-				else if(mode = "booster") list+=`${row.name} (collection ${row.collection}) :: ${row.price}${config.currency}`;
+				channel.send(Manager.asciiDoc(list));
 			});
+		}
+		else if(mode=="booster") {
+			var sql = "SELECT * FROM Inventory I JOIN Boosters B ON B.boosterId = I.itemId WHERE I.userId = ? AND I.type = ?";
+			this.database.all(sql, [this.ownerId,mode], (err,rows) => {
 
-			channel.send(Manager.asciiDoc(list));
-		});
+				var maxPage = Math.ceil(rows.length/threshold);
+				page = maxPage<page ? maxPage : page;
+				
+				var list = "= Your booster inventory (Page "+page+"/"+maxPage+")=\n\n";
+				rows = Manager.sliceArray(rows,threshold,page);
+
+				rows.forEach((row) => {
+					list+=`${row.name} (collection ${row.collection}) :: ${row.price}${config.currency}\n`;
+				});
+
+				channel.send(Manager.asciiDoc(list));
+			});
+		}
+		else return false;
 	}
 }
 
@@ -120,6 +142,10 @@ class DoggoManager extends Manager {
 	constructor(database,ownerId) {
 		super(database);
 		this.ownerId = ownerId;
+	}
+
+	static toAsciiString() {
+		return `${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}`;
 	}
 }
 
@@ -133,7 +159,7 @@ module.exports = {
 	Manager : Manager,
 	BoosterManager : BoosterManager,
 	InventoryManager : InventoryManager,
-
+	DoggoManager : DoggoManager
 }
 
 module.exports.config = {
