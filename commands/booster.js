@@ -31,7 +31,7 @@ module.exports.run = async(client, message, args) => {
 		break;
 
 		default:
-			message.channel.send("Unknown booster command.");
+			message.channel.send("TODO Booster command list");
 		break;
 	}
 }

@@ -8,12 +8,20 @@ module.exports.run = async(client, message, args) => {
 	const InventoryManager = classes.InventoryManager;
 	
 	var profiles = client.databases.get("profiles");
-	var bManager = new BoosterManager(profiles);
 	var iManager = new InventoryManager(profiles,message.author.id);
 
-	var mode = args[0];
+	var page = args[1] ? args[1] : 1;
+	var mode = args[0] ? args[0] : "booster";
 
-	iManager.viewInventory(message.channel,mode);
+	//gestion des alias
+	if(mode == 'b') mode = "booster";
+	else if(mode == 'd') mode = "doggo";
+	if(!mode == 'booster' && !mode == 'doggo') return message.channel.send("Unknown parameter");	
+
+	//var array = [1,2,3,4,5,6,7,8,9,10,11,12];
+	//console.log(Manager.sliceArray(array,5,2));
+
+	iManager.viewInventory(message.channel,mode,page,5);
 }
 
 module.exports.config = {
