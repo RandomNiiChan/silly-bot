@@ -40,7 +40,7 @@ function loadGeneralCmds() {
 		jsfiles.forEach((f,i) => {
 			delete require.cache[require.resolve(`./commands/${f}`)];
 			
-			if(f == "classes.js" || f == "util.js") console.log("BEEP BEEP");
+			if(f == "classes.js" || f == "util.js") console.log("[Utilitary file found: "+f+"]");
 			else {
 				console.log(`Command ${f} loading...`);
 				var cmds = require(`./commands/${f}`);
@@ -61,7 +61,7 @@ function loadWarframeCmds() {
 		jsfiles.forEach((f,i) => {
 			delete require.cache[require.resolve(`./commands/warframeCommands/${f}`)];
 
-			if(f == "classes.js" || f == "util.js") console.log("BEEP BEEP");
+			if(f == "classes.js" || f == "util.js") console.log("[Utilitary file found: "+f+"]");
 			else {
 				console.log(`Command ${f} loading...`);
 				var cmds = require(`./commands/warframeCommands/${f}`);
@@ -82,7 +82,7 @@ function loadMonsterHunterCmds() {
 		jsfiles.forEach((f,i) => {
 			delete require.cache[require.resolve(`./commands/mhwCommands/${f}`)];
 
-			if(f == "classes.js" || f == "util.js") console.log("BEEP BEEP");
+			if(f == "classes.js" || f == "util.js") console.log("[Utilitary file found: "+f+"]");
 			else {
 				console.log(`Command ${f} loading...`);
 				var cmds = require(`./commands/mhwCommands/${f}`);
@@ -142,6 +142,7 @@ client.on("message", (message) => {
 		loadMonsterHunterCmds();
 		loadDatabases();
 		message.channel.send(`meep morp commands and databases reloaded`);
+		console.log("===Commands fully reloaded===")
 	}
 
 	var cmd = client.commands.get(command);
