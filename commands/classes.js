@@ -143,7 +143,7 @@ class InventoryManager extends Manager {
 			collector.on('end', (collected,reason) => {
 				switch(reason) {
 					case 'time': channel.send("You took too much time to answer."); break;
-					case 'abort': channel.send("Booster opening aborted."); break;
+					case 'abort': channel.send("Booster purchase aborted."); break;
 					case 'validate':
 						this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
 							//Si assez de crédits
@@ -162,6 +162,36 @@ class InventoryManager extends Manager {
 		});
 	}
 
+	sellBooster(channel,boosterId) {
+		//récupérer le booster
+		this.database.get("SELECT * FROM Boosters B JOIN Inventory I ON I.itemId = B.boosterId WHERE boosterId = ? AND I.userId = ?",[boosterId,this.ownerId], (err,rowB) => {
+			//Si il n'existe pas
+			if(!rowB) return channel.send("You do not have this booster in your inventory.");
+
+			channel.send(`Do you want to sell ${Manager.vowelCheck(rowB.name)} booster for ${rowB.price/2} ${config.currency} ? \`(yes/no)\``);
+			var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
+
+			collector.on('collect', (mess) => {
+				if(mess.content === "no") collector.stop("abort");
+				else if(mess.content === "yes") collector.stop("validate");
+			});
+
+			collector.on('end', (collected,reason) => {
+				switch(reason) {
+					case 'time': channel.send("You took too much time to answer."); break;
+					case 'abort': channel.send("Booster sale aborted."); break;
+					case 'validate':
+						this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
+							this.editBalance(rowB.price/2);
+							this.removeFromInventory(boosterId,1,"booster");
+							channel.send(`You sold ${Manager.vowelCheck(rowB.name)} booster for ${rowB.price/2} ${config.currency}.`);				
+						});
+					break;
+				}
+			});
+		});
+	}
+
 	viewInventory(channel,mode,page,threshold) {
 		if(mode=="doggo") {
 			var sql = "SELECT * FROM Inventory I JOIN Doggos D ON I.itemId = D.doggoId WHERE I.userId = ? AND I.type = ?";
@@ -173,7 +203,7 @@ class InventoryManager extends Manager {
 				var list = "= Your doggo inventory (Page "+page+"/"+maxPage+")=\n\n";
 				rows.sort(function(x,y) {
 					var map = {"common":1,"uncommon":2,"rare":3,"superRare":4};
-					return (map[x]-map[y]);
+					return (map[y.rarity]-map[x.rarity]);
 				});
 				rows = Manager.sliceArray(rows,threshold,page-1);
 
@@ -257,8 +287,42 @@ class DoggoManager extends Manager {
 		this.ownerId = ownerId;
 	}
 
+	sellDoggo(channel,doggo) {
+		//récupérer le booster
+		this.database.get("SELECT * FROM Doggos D JOIN Inventory I ON I.itemId = D.doggoId WHERE D.doggoId = ? AND I.userId = ?",[doggo,this.ownerId], (err,rowD) => {
+			//Si il n'existe pas
+			if(!rowB) return channel.send("You do not have this doggo in your inventory.");
+
+			channel.send(`Do you want to sell ${Manager.vowelCheck(rowD.name)} doggo for ${rowD.price} ${config.currency} ? \`(yes/no)\``);
+			var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
+
+			collector.on('collect', (mess) => {
+				if(mess.content === "no") collector.stop("abort");
+				else if(mess.content === "yes") collector.stop("validate");
+			});
+
+			collector.on('end', (collected,reason) => {
+				switch(reason) {
+					case 'time': channel.send("You took too much time to answer."); break;
+					case 'abort': channel.send("Doggo sale aborted."); break;
+					case 'validate':
+						this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
+							this.editBalance(rowD.price);
+							this.removeFromInventory(doggo,1,"doggo");
+							channel.send(`You sold ${Manager.vowelCheck(rowD.name)} doggo for ${rowB.price} ${config.currency}.`);				
+						});
+					break;
+				}
+			});
+		});
+	}
+
+	inspect(doggo) {
+		var embed = new Discord.richEmbed();
+	}
+
 	static toAsciiString(row) {
-		return `${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}`;
+		return `${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nID :: ${row.doggoId}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}`;
 	}
 }
 
