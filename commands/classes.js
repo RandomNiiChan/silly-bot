@@ -2,16 +2,16 @@ const config = require('../json/config.json');
 const Discord = require('discord.js');
 
 class LootTable {
-	constructor(row) {
+	constructor(rarities) {
 		this.items = ["superRare","rare","uncommon","common"];
 
 		this.weightedArray = new Array();
 		this.probabilities = new Array();
 
-		this.probabilities.push(row.superRare*100);
-		this.probabilities.push(row.rare*100);
-		this.probabilities.push(row.uncommon*100);
-		this.probabilities.push(row.common*100);
+		this.probabilities.push(rarities.superRare*100);
+		this.probabilities.push(rarities.rare*100);
+		this.probabilities.push(rarities.uncommon*100);
+		this.probabilities.push(rarities.common*100);
 
 		this.generateWeightedArray();
 	}
@@ -28,6 +28,10 @@ class LootTable {
 		var random = Math.random()*(this.weightedArray.length-1);
 		random = Math.ceil(random);
 		return this.weightedArray[random];
+	}
+
+	multiroll(rows) {
+
 	}
 }
 
@@ -68,7 +72,7 @@ class BoosterManager extends Manager{
 		this.database.all("SELECT * FROM Boosters", [], (err,rows) => {
 			var string = "= Available Boosters =\n\n";
 			rows.forEach((row)=>{
-				string+=`${row.boosterId} :: ${row.name} - ${row.price}$\n`;
+				string+=`${row.boosterId} :: ${row.name} - ${row.price}${config.currency}\n`;
 			});
 
 			channel.send(Manager.asciiDoc(string));
@@ -128,7 +132,7 @@ class InventoryManager extends Manager {
 			//Si il n'existe pas
 			if(!rowB) return channel.send("This booster doesn't exist.");
 
-			channel.send(`Do you want to buy ${Manager.vowelCheck(row.name)} booster ? \`(yes/no)\``);
+			channel.send(`Do you want to buy ${Manager.vowelCheck(rowB.name)} booster for ${rowB.price}${config.currency} ? \`(yes/no)\``);
 			var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
 
 			collector.on('collect', (mess) => {
@@ -167,6 +171,10 @@ class InventoryManager extends Manager {
 				page = maxPage<page ? maxPage : page;
 				
 				var list = "= Your doggo inventory (Page "+page+"/"+maxPage+")=\n\n";
+				rows.sort(function(x,y) {
+					var map = {"common":1,"uncommon":2,"rare":3,"superRare":4};
+					return (map[x]-map[y]);
+				});
 				rows = Manager.sliceArray(rows,threshold,page-1);
 
 				rows.forEach((row) => {
@@ -199,54 +207,46 @@ class InventoryManager extends Manager {
 	}
 
 	openBooster(channel,booster) {
-		//Vérifier si le booster existe dans la BD
-		this.database.get("SELECT * FROM Boosters WHERE boosterId = ?",[booster], (err,row) => {
-			//console.log(row);
-			if(!row) return channel.send("This booster does not exist.");
+		var sql = "SELECT * FROM DropRates D JOIN Inventory I ON I.itemId = D.boosterId JOIN Boosters B ON B.boosterId = D.boosterId WHERE I.itemId IN (SELECT itemId FROM Inventory WHERE type = 'booster' AND itemId = ? AND userId = ?)";
+		this.database.get(sql, [booster,this.ownerId], (err,row) => {
+			if(!row) channel.send("You do not have this booster in your inventory.");
+			else {
+				channel.send(`Do you want to open ${Manager.vowelCheck(booster)} booster ? \`(yes/no)\``);
+				var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
 
-			channel.send(`Do you want to open ${Manager.vowelCheck(row.name)} booster ? \`(yes/no)\``);
-			var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
+				collector.on('collect', (mess) => {
+					if(mess.content === "no"){
+						//mess.delete();
+						collector.stop("abort");
+					}
+					else if(mess.content === "yes"){
+						//mess.delete();
+						collector.stop("validate");
+					}
+				});
 
-			collector.on('collect', (mess) => {
-				if(mess.content === "no"){
-					//mess.delete();
-					collector.stop("abort");
-				}
-				else if(mess.content === "yes"){
-					//mess.delete();
-					collector.stop("validate");
-				}
-			});
-
-			collector.on('end', (collected,reason) => {
-				switch(reason) {
-					case 'time': channel.send("You took too much time to answer."); break;
-					case 'abort': channel.send("Booster opening aborted."); break;
-					case 'validate':
-						//boosterId, common, uncommon, rare, superRare, userId, type, itemId, quantity, name, price
-						//Si le booster n'existe pas ou qu'il ne l'a pas retourne aucune ligne
-						var sql = "SELECT * FROM DropRates D JOIN Inventory I ON I.itemId = D.boosterId JOIN Boosters B ON B.boosterId = D.boosterId WHERE I.itemId IN (SELECT itemId FROM Inventory WHERE type = 'booster' AND itemId = ? AND userId = ?)";
-						this.database.get(sql, [booster,this.ownerId], (err,row) => {
-							if(!row) channel.send("You do not have this booster in your inventory.");
-							else {
-								//tirage de la rareté
-								var loot = new LootTable(row);
-								var rarity = loot.roll();
-								//console.log(rarity);
-								//choisir un doggo parmi la collection choisie et la rareté tirée
-								this.database.all("SELECT * FROM Doggos WHERE rarity = ? AND collection = ?", [rarity,booster], (err,rows) => {
-									//console.log(rows);
-									var i = Math.random()*(rows.length-1);
-									i = Math.ceil(i);
-									this.insertIntoInventory(rows[i].doggoId,1,"doggo");
-									this.removeFromInventory(booster,1,"booster");
-									channel.send(`By opening this booster, you gained ${Manager.vowelCheck(rows[i].name)}!`);
-								});
-							}
-						});
-					break;
-				}
-			});
+				collector.on('end', (collected,reason) => {
+					switch(reason) {
+						case 'time': channel.send("You took too much time to answer."); break;
+						case 'abort': channel.send("Booster opening aborted."); break;
+						case 'validate':
+							//tirage de la rareté
+							var loot = new LootTable(row);
+							var rarity = loot.roll();
+							//console.log(rarity);
+							//choisir un doggo parmi la collection choisie et la rareté tirée
+							this.database.all("SELECT * FROM Doggos WHERE rarity = ? AND collection = ?", [rarity,booster], (err,rows) => {
+								//console.log(rows);
+								var i = Math.random()*(rows.length-1);
+								i = Math.ceil(i);
+								this.insertIntoInventory(rows[i].doggoId,1,"doggo");
+								this.removeFromInventory(booster,1,"booster");
+								channel.send(`By opening this booster, you gained ${Manager.vowelCheck(rows[i].name)} (${rows[i].rarity}) !`);
+							});
+						break;
+					}
+				});
+			}
 		});
 	}
 }
