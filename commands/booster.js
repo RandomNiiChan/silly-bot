@@ -41,6 +41,11 @@ module.exports.run = async(client, message, args) => {
 			}
 		break;
 
+		case 'sell':
+			if(!booster) message.channel.send("Please input a booster to sell.");
+			else iManager.sellBooster(message.channel,booster);
+		break;
+
 		default:
 			message.channel.send("TODO Booster command list");
 		break;
