@@ -16,10 +16,7 @@ module.exports.run = async(client, message, args) => {
 	//gestion des alias
 	if(mode == 'b') mode = "booster";
 	else if(mode == 'd') mode = "doggo";
-	if(!mode == 'booster' && !mode == 'doggo') return message.channel.send("Unknown parameter");	
-
-	//var array = [1,2,3,4,5,6,7,8,9,10,11,12];
-	//console.log(Manager.sliceArray(array,5,2));
+	if(!mode == 'booster' && !mode == 'doggo') return message.channel.send("Unknown parameter");
 
 	iManager.viewInventory(message.channel,mode,page,5);
 }

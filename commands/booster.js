@@ -30,6 +30,13 @@ module.exports.run = async(client, message, args) => {
 			else bManager.inspect(message.channel,booster);
 		break;
 
+		case 'open':
+			if(!booster) message.channel.send("Please input a booster to open.");
+			else {
+				iManager.openBooster(message.channel,booster);
+			}
+		break;
+
 		default:
 			message.channel.send("TODO Booster command list");
 		break;
