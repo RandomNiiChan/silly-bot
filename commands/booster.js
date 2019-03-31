@@ -33,7 +33,11 @@ module.exports.run = async(client, message, args) => {
 		case 'open':
 			if(!booster) message.channel.send("Please input a booster to open.");
 			else {
-				iManager.openBooster(message.channel,booster);
+				profiles.get("SELECT * FROM Boosters WHERE boosterId = ?",[booster], (err,row) => {
+					//console.log(row);
+					if(!row) return message.channel.send("This booster does not exist.");
+					iManager.openBooster(message.channel,booster);
+				});	
 			}
 		break;
 
