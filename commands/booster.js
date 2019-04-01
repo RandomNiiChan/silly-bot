@@ -30,6 +30,22 @@ module.exports.run = async(client, message, args) => {
 			else bManager.inspect(message.channel,booster);
 		break;
 
+		case 'open':
+			if(!booster) message.channel.send("Please input a booster to open.");
+			else {
+				profiles.get("SELECT * FROM Boosters WHERE boosterId = ?",[booster], (err,row) => {
+					//console.log(row);
+					if(!row) return message.channel.send("This booster does not exist.");
+					iManager.openBooster(message.channel,booster);
+				});	
+			}
+		break;
+
+		case 'sell':
+			if(!booster) message.channel.send("Please input a booster to sell.");
+			else iManager.sellBooster(message.channel,booster);
+		break;
+
 		default:
 			message.channel.send("TODO Booster command list");
 		break;

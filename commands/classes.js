@@ -1,4 +1,39 @@
 const config = require('../json/config.json');
+const Discord = require('discord.js');
+
+class LootTable {
+	constructor(rarities) {
+		this.items = ["superRare","rare","uncommon","common"];
+
+		this.weightedArray = new Array();
+		this.probabilities = new Array();
+
+		this.probabilities.push(rarities.superRare*100);
+		this.probabilities.push(rarities.rare*100);
+		this.probabilities.push(rarities.uncommon*100);
+		this.probabilities.push(rarities.common*100);
+
+		this.generateWeightedArray();
+	}
+
+	generateWeightedArray() {
+		for(var i in this.probabilities) {
+			for(var j=0; j<this.probabilities[i]; j++) {
+				this.weightedArray.push(this.items[i]);
+			}
+		}
+	}
+
+	roll() {
+		var random = Math.random()*(this.weightedArray.length-1);
+		random = Math.ceil(random);
+		return this.weightedArray[random];
+	}
+
+	multiroll(rows) {
+
+	}
+}
 
 class Manager {
 	constructor(database) {
@@ -18,6 +53,14 @@ class Manager {
 		}
 		else return array;
 	}
+
+	static vowelCheck(string) {
+		var res = "";
+		if(string.match(/^(a|e|i|o|u|A|E|I|O|U).*/gm)) res = "an "+string;
+		else res = "a "+string;
+
+		return res;
+	}
 }
 
 class BoosterManager extends Manager{
@@ -29,7 +72,7 @@ class BoosterManager extends Manager{
 		this.database.all("SELECT * FROM Boosters", [], (err,rows) => {
 			var string = "= Available Boosters =\n\n";
 			rows.forEach((row)=>{
-				string+=`${row.boosterId} :: ${row.name} - ${row.price}$\n`;
+				string+=`${row.boosterId} :: ${row.name} - ${row.price}${config.currency}\n`;
 			});
 
 			channel.send(Manager.asciiDoc(string));
@@ -48,7 +91,7 @@ class BoosterManager extends Manager{
 		});
 	}
 
-	static boosterToAsciiString(row) {
+	static toAsciiString(row) {
 		return `${row.name} (collection ${row.collection}) :: ${row.price}${config.currency}`;
 	}
 }
@@ -70,6 +113,13 @@ class InventoryManager extends Manager {
 		});
 	}
 
+	removeFromInventory(itemId,quantity,type) {
+		this.database.get("SELECT * FROM Inventory WHERE userId = ? AND itemId = ?", [this.ownerId, itemId], (err,row) => {
+			if(row.quantity-quantity >= 1) this.database.run("UPDATE Inventory SET quantity = ? WHERE userId = ? AND itemId = ?", [row.quantity-quantity, this.ownerId, itemId]);
+			else this.database.run("DELETE FROM Inventory WHERE userId = ? AND itemId = ?",[this.ownerId,itemId]);
+		});
+	}
+
 	editBalance(amount) {
 		this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
 			this.database.run("UPDATE Users SET credits =  ? WHERE userId = ?", [row.credits + amount, this.ownerId]);
@@ -81,20 +131,63 @@ class InventoryManager extends Manager {
 		this.database.get("SELECT * FROM Boosters WHERE boosterId = ?",[boosterId], (err,rowB) => {
 			//Si il n'existe pas
 			if(!rowB) return channel.send("This booster doesn't exist.");
-			this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
-				//Si assez de crédits
-				if(row.credits >= rowB.price) {
-					this.editBalance(-rowB.price);
-					this.insertIntoInventory(boosterId,1,"booster");
-					//conjugaison
-					if(rowB.name.match(/^(a|e|i|o|u|y|A|E|I|O|U|Y).*/gm))
-						channel.send(`You bought an ${rowB.name} booster for ${rowB.price} ${config.currency}.`);
-					else 
-						channel.send(`You bought a ${rowB.name} booster for ${rowB.price} ${config.currency}.`);
+
+			channel.send(`Do you want to buy ${Manager.vowelCheck(rowB.name)} booster for ${rowB.price}${config.currency} ? \`(yes/no)\``);
+			var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
+
+			collector.on('collect', (mess) => {
+				if(mess.content === "no") collector.stop("abort");
+				else if(mess.content === "yes") collector.stop("validate");
+			});
+
+			collector.on('end', (collected,reason) => {
+				switch(reason) {
+					case 'time': channel.send("You took too much time to answer."); break;
+					case 'abort': channel.send("Booster purchase aborted."); break;
+					case 'validate':
+						this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
+							//Si assez de crédits
+							if(row.credits >= rowB.price) {
+								this.editBalance(-rowB.price);
+								this.insertIntoInventory(boosterId,1,"booster");
+								channel.send(`You bought ${Manager.vowelCheck(rowB.name)} booster for ${rowB.price} ${config.currency}.`);
+							}
+							else {
+								return channel.send("You don't have enough "+config.currency+".");
+							}					
+						});
+					break;
 				}
-				else {
-					return channel.send("You don't have enough "+config.currency+".");
-				}					
+			});
+		});
+	}
+
+	sellBooster(channel,boosterId) {
+		//récupérer le booster
+		this.database.get("SELECT * FROM Boosters B JOIN Inventory I ON I.itemId = B.boosterId WHERE boosterId = ? AND I.userId = ?",[boosterId,this.ownerId], (err,rowB) => {
+			//Si il n'existe pas
+			if(!rowB) return channel.send("You do not have this booster in your inventory.");
+
+			channel.send(`Do you want to sell ${Manager.vowelCheck(rowB.name)} booster for ${rowB.price/2} ${config.currency} ? \`(yes/no)\``);
+			var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
+
+			collector.on('collect', (mess) => {
+				if(mess.content === "no") collector.stop("abort");
+				else if(mess.content === "yes") collector.stop("validate");
+			});
+
+			collector.on('end', (collected,reason) => {
+				switch(reason) {
+					case 'time': channel.send("You took too much time to answer."); break;
+					case 'abort': channel.send("Booster sale aborted."); break;
+					case 'validate':
+						this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
+							this.editBalance(rowB.price/2);
+							this.removeFromInventory(boosterId,1,"booster");
+							channel.send(`You sold ${Manager.vowelCheck(rowB.name)} booster for ${rowB.price/2} ${config.currency}.`);				
+						});
+					break;
+				}
 			});
 		});
 	}
@@ -108,10 +201,15 @@ class InventoryManager extends Manager {
 				page = maxPage<page ? maxPage : page;
 				
 				var list = "= Your doggo inventory (Page "+page+"/"+maxPage+")=\n\n";
+				rows.sort(function(x,y) {
+					var map = {"common":1,"uncommon":2,"rare":3,"superRare":4};
+					return (map[y.rarity]-map[x.rarity]);
+				});
 				rows = Manager.sliceArray(rows,threshold,page-1);
 
 				rows.forEach((row) => {
-					list+=`${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}\n\n`;
+					var temp = DoggoManager.toAsciiString(row)+`\nQuantity :: ${row.quantity}\n\n`;
+					list+=temp;
 				});
 
 				channel.send(Manager.asciiDoc(list));
@@ -128,13 +226,58 @@ class InventoryManager extends Manager {
 				rows = Manager.sliceArray(rows,threshold,page);
 
 				rows.forEach((row) => {
-					list+=`${row.name} (collection ${row.collection}) :: ${row.price}${config.currency}\n`;
+					var temp = BoosterManager.toAsciiString(row)+`\nQuantity :: ${row.quantity}\n\n`;
+					list+=temp;
 				});
 
 				channel.send(Manager.asciiDoc(list));
 			});
 		}
 		else return false;
+	}
+
+	openBooster(channel,booster) {
+		var sql = "SELECT * FROM DropRates D JOIN Inventory I ON I.itemId = D.boosterId JOIN Boosters B ON B.boosterId = D.boosterId WHERE I.itemId IN (SELECT itemId FROM Inventory WHERE type = 'booster' AND itemId = ? AND userId = ?)";
+		this.database.get(sql, [booster,this.ownerId], (err,row) => {
+			if(!row) channel.send("You do not have this booster in your inventory.");
+			else {
+				channel.send(`Do you want to open ${Manager.vowelCheck(booster)} booster ? \`(yes/no)\``);
+				var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
+
+				collector.on('collect', (mess) => {
+					if(mess.content === "no"){
+						//mess.delete();
+						collector.stop("abort");
+					}
+					else if(mess.content === "yes"){
+						//mess.delete();
+						collector.stop("validate");
+					}
+				});
+
+				collector.on('end', (collected,reason) => {
+					switch(reason) {
+						case 'time': channel.send("You took too much time to answer."); break;
+						case 'abort': channel.send("Booster opening aborted."); break;
+						case 'validate':
+							//tirage de la rareté
+							var loot = new LootTable(row);
+							var rarity = loot.roll();
+							//console.log(rarity);
+							//choisir un doggo parmi la collection choisie et la rareté tirée
+							this.database.all("SELECT * FROM Doggos WHERE rarity = ? AND collection = ?", [rarity,booster], (err,rows) => {
+								//console.log(rows);
+								var i = Math.random()*(rows.length-1);
+								i = Math.ceil(i);
+								this.insertIntoInventory(rows[i].doggoId,1,"doggo");
+								this.removeFromInventory(booster,1,"booster");
+								channel.send(`By opening this booster, you gained ${Manager.vowelCheck(rows[i].name)} (${rows[i].rarity}) !`);
+							});
+						break;
+					}
+				});
+			}
+		});
 	}
 }
 
@@ -144,22 +287,51 @@ class DoggoManager extends Manager {
 		this.ownerId = ownerId;
 	}
 
-	static toAsciiString() {
-		return `${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}`;
-	}
-}
+	sellDoggo(channel,doggo) {
+		//récupérer le booster
+		this.database.get("SELECT * FROM Doggos D JOIN Inventory I ON I.itemId = D.doggoId WHERE D.doggoId = ? AND I.userId = ?",[doggo,this.ownerId], (err,rowD) => {
+			//Si il n'existe pas
+			if(!rowB) return channel.send("You do not have this doggo in your inventory.");
 
-module.exports.run = async(client, message, args) => {
-	//Cette commande doit rester vide
-	//C'est un fichier qui contient des commandes utiles
-	message.channel.send("ALEEEEEED");
+			channel.send(`Do you want to sell ${Manager.vowelCheck(rowD.name)} doggo for ${rowD.price} ${config.currency} ? \`(yes/no)\``);
+			var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
+
+			collector.on('collect', (mess) => {
+				if(mess.content === "no") collector.stop("abort");
+				else if(mess.content === "yes") collector.stop("validate");
+			});
+
+			collector.on('end', (collected,reason) => {
+				switch(reason) {
+					case 'time': channel.send("You took too much time to answer."); break;
+					case 'abort': channel.send("Doggo sale aborted."); break;
+					case 'validate':
+						this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
+							this.editBalance(rowD.price);
+							this.removeFromInventory(doggo,1,"doggo");
+							channel.send(`You sold ${Manager.vowelCheck(rowD.name)} doggo for ${rowB.price} ${config.currency}.`);				
+						});
+					break;
+				}
+			});
+		});
+	}
+
+	inspect(doggo) {
+		var embed = new Discord.richEmbed();
+	}
+
+	static toAsciiString(row) {
+		return `${row.name} (${row.rarity} doggo) :: ${row.price}${config.currency}\nID :: ${row.doggoId}\nCollection :: ${row.collection}\nEfficiency :: ${row.efficiency}`;
+	}
 }
 
 module.exports = {
 	Manager : Manager,
 	BoosterManager : BoosterManager,
 	InventoryManager : InventoryManager,
-	DoggoManager : DoggoManager
+	DoggoManager : DoggoManager,
+	LootTable : LootTable
 }
 
 module.exports.config = {
