@@ -6,20 +6,31 @@ module.exports.run = async(client, message, args) => {
 	const Manager = classes.Manager;
 	const BoosterManager = classes.BoosterManager;
 	const InventoryManager = classes.InventoryManager;
+	const DoggoManager = classes.DoggoManager;
 	
 	var profiles = client.databases.get("profiles");
-	var bManager = new BoosterManager(profiles);
+	var dManager = new DoggoManager(profiles);
 	var iManager = new InventoryManager(profiles,message.author.id);
 
 	var mode = args[0];
-	var booster = args[1];
+	var doggo = args[1];
 
-	//var attachment = new Discord.Attachment("./assets/warframe.png");
-	var embed = new Discord.RichEmbed()
-		.attachFile("./assets/warframe.png")
-		.setImage("attachment://warframe.png")
-		.setTitle("Yes");
-	message.channel.send(embed);
+	switch(mode) {
+		case 'sell':
+			if(!doggo) return message.channel.send("Please input a doggo to inspect.");
+			else iManager.sellDoggo(message.channel,doggo);
+		break;
+
+		case 'inspect':
+			if(!doggo) return message.channel.send("Please input a doggo to inspect.");
+			else {
+				profiles.get("SELECT * FROM Doggos WHERE doggoId = ?",[doggo],(err,row) => {
+					if(!row) return message.channel.send("This doggo doesn't exist...");
+					else message.channel.send(DoggoManager.inspect(row));
+				});
+			}
+		break;
+	}
 }
 
 module.exports.config = {

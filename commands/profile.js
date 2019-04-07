@@ -5,12 +5,14 @@ module.exports.run = async(client, message, args) => {
 	var profiles = client.databases.get("profiles");
 
 	var embed = new Discord.RichEmbed();
-	embed.setColor(config.embedColor);
+	
 
 	if(message.mentions.users.first()) var user = message.mentions.users.first();
 	else var user = message.author;
 
 	profiles.get("SELECT * FROM Users WHERE userId = ?",[user.id], (err,row) => {
+		if(!row.color) embed.setColor(config.embedColor);
+		else embed.setColor(row.color);
 		embed.setTitle(user.tag);
 		embed.setDescription(row.bio);
 		embed.addField("Level "+row.level, "XP: "+row.xp+"/"+row.nextLevel);
