@@ -11,7 +11,7 @@ module.exports.run = async(client, message, args) => {
 	var iManager = new InventoryManager(profiles,message.author.id);
 
 	var page = args[1] ? args[1] : 1;
-	var mode = args[0] ? args[0] : "booster";
+	var mode = args[0] ? args[0].toLowerCase() : "booster";
 
 	//gestion des alias
 	if(mode == 'b') mode = "booster";
