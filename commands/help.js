@@ -24,7 +24,8 @@ module.exports.run = async(client, message, args) => {
 			var embed = new Discord.RichEmbed()
 				.setColor(config.embedColor)
 				.setTitle(`${about.name}, ${about.description}`)
-				.setThumbnail("https://cdn.glitch.com/049db61c-f3f3-4185-9d81-b3fa8dc6cb22%2Ficon.png?1545664804309")
+				.attachFile("./assets/icon.png")
+				.setThumbnail("attachment://icon.png")
 				.setDescription(`Préfixe des commandes: ${config.prefix}\nEnvoyez **${config.prefix}help [nom de la commande]** pour en apprendre plus sur celle-ci !`);
 
 			jsfiles.forEach((f,i) => {
@@ -47,7 +48,8 @@ module.exports.run = async(client, message, args) => {
 				var configFile = command.config;
 				var embed = new Discord.RichEmbed()
 					.setColor(config.embedColor)
-					.setThumbnail("https://cdn.glitch.com/049db61c-f3f3-4185-9d81-b3fa8dc6cb22%2Ficon.png?1545664804309")
+					.attachFile("./assets/icon.png")
+					.setThumbnail("attachment://icon.png")
 					.setTitle(`Commande ${configFile.command}`)
 					.addField("Syntaxe", config.prefix+configFile.syntax)
 					.setDescription(configFile.description);

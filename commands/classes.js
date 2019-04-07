@@ -279,19 +279,13 @@ class InventoryManager extends Manager {
 			}
 		});
 	}
-}
 
-class DoggoManager extends Manager {
-	constructor(database,ownerId) {
-		super(database);
-		this.ownerId = ownerId;
-	}
-
+	//TODO FIX SELLDOGGO
 	sellDoggo(channel,doggo) {
 		//récupérer le booster
 		this.database.get("SELECT * FROM Doggos D JOIN Inventory I ON I.itemId = D.doggoId WHERE D.doggoId = ? AND I.userId = ?",[doggo,this.ownerId], (err,rowD) => {
 			//Si il n'existe pas
-			if(!rowB) return channel.send("You do not have this doggo in your inventory.");
+			if(!rowD) return channel.send("You do not have this doggo in your inventory.");
 
 			channel.send(`Do you want to sell ${Manager.vowelCheck(rowD.name)} doggo for ${rowD.price} ${config.currency} ? \`(yes/no)\``);
 			var collector = new Discord.MessageCollector(channel,m=>m.author.id === this.ownerId, {time:10000});
@@ -309,16 +303,32 @@ class DoggoManager extends Manager {
 						this.database.get("SELECT * FROM Users WHERE userId = ?", [this.ownerId], (err,row) => {
 							this.editBalance(rowD.price);
 							this.removeFromInventory(doggo,1,"doggo");
-							channel.send(`You sold ${Manager.vowelCheck(rowD.name)} doggo for ${rowB.price} ${config.currency}.`);				
+							channel.send(`You sold ${Manager.vowelCheck(rowD.name)} doggo for ${rowD.price} ${config.currency}.`);				
 						});
 					break;
 				}
 			});
 		});
 	}
+}
 
-	inspect(doggo) {
-		var embed = new Discord.richEmbed();
+class DoggoManager extends Manager {
+	constructor(database,ownerId) {
+		super(database);
+	}
+
+	static inspect(doggo) {
+		var embed = new Discord.RichEmbed();
+		embed
+			.attachFile(`./assets/doggos/${doggo.collection}/${doggo.doggoId}.jpg`)
+			.setTitle(`${doggo.name} (${doggo.doggoId})`)
+			.setDescription("Rarity: "+doggo.rarity)
+			.setColor(config.embedColor)
+			.setImage(`attachment://${doggo.doggoId}.jpg`)
+			.addField('Selling price',doggo.price+" "+config.currency,true)
+			.addField('Efficiency',doggo.efficiency,true)
+			.addField('Collection',doggo.collection);
+		return embed;
 	}
 
 	static toAsciiString(row) {
