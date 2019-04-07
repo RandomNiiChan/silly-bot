@@ -14,7 +14,12 @@ module.exports.run = async(client, message, args) => {
 	var mode = args[0];
 	var booster = args[1];
 
-	message.channel.send("TODO");
+	//var attachment = new Discord.Attachment("./assets/warframe.png");
+	var embed = new Discord.RichEmbed()
+		.attachFile("./assets/warframe.png")
+		.setImage("attachment://warframe.png")
+		.setTitle("Yes");
+	message.channel.send(embed);
 }
 
 module.exports.config = {

@@ -22,7 +22,9 @@ function rootEmbed()
 {
 	var embed = new Discord.RichEmbed()
 	.setColor(config.embedColor)
-	.setThumbnail("https://cdn.glitch.com/049db61c-f3f3-4185-9d81-b3fa8dc6cb22%2Fwarframe.png?1545598146058");
+	.attachFile("./assets/warframe.png")
+	//.setThumbnail("https://cdn.glitch.com/049db61c-f3f3-4185-9d81-b3fa8dc6cb22%2Fwarframe.png?1545598146058");
+	.setThumbnail("attachment://warframe.png");
 	return embed;
 }
 module.exports.rootEmbed = rootEmbed;
