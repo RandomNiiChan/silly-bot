@@ -18,6 +18,6 @@ module.exports.run = async(client, message, args) => {
 
 module.exports.config = {
 	command: "setcolor",
-	syntax: "setbio {6-character long hex string}",
+	syntax: "setcolor {6-character long hex string}",
 	description: "Edits your profile's color. You must use a 6-character long hexadecimal color string corresponding to your color (eg: fff000), without the #.\n[This tool can help you.](https://www.w3schools.com/colors/colors_picker.asp)"
 }

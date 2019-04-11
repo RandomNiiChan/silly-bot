@@ -8,6 +8,7 @@ client.commands = new Discord.Collection();
 client.warcommands = new Discord.Collection();
 client.mhwcommands = new Discord.Collection();
 client.databases = new Discord.Collection();
+client.rifts = new Discord.Collection();
 
 function loadDatabases() {
 	fs.readdir('./databases/', (err,files) => {

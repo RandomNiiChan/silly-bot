@@ -280,7 +280,6 @@ class InventoryManager extends Manager {
 		});
 	}
 
-	//TODO FIX SELLDOGGO
 	sellDoggo(channel,doggo) {
 		//récupérer le booster
 		this.database.get("SELECT * FROM Doggos D JOIN Inventory I ON I.itemId = D.doggoId WHERE D.doggoId = ? AND I.userId = ?",[doggo,this.ownerId], (err,rowD) => {
@@ -336,12 +335,86 @@ class DoggoManager extends Manager {
 	}
 }
 
+class Rift {
+	//Creation du rift à partir d'une ligne sql
+	constructor(row) {
+		this.id = row.id;
+		this.name = row.name;
+		this.minReward = row.minReward;
+		this.maxReward = row.maxReward;
+		this.itemProb = row.itemProb;
+		this.description = row.description;
+		this.maxCapacity = row.maxCapacity;
+
+		this.doggos = new Array();
+		this.droppableItems = new Array();
+		this.equippedItem = null;
+	}
+
+	assignItems(rows) {
+		for(var row in rows) {
+
+		}
+	}
+
+	generateRewardRaw() {
+		return Math.floor(Math.random() * this.maxReward) + this.minReward;
+	}
+
+	generateReward() {
+		var reward = 0;
+		for(var d in this.doggos) {
+			reward+=d.efficiency*this.generateRewardRaw();
+		}
+		return reward;
+	}
+
+	getItem() {
+		if(Math.floor(Math.random()*100) < this.itemProb) {
+			var item = this.droppableItems[Math.floor(Math.random()*this.droppableItems.length-1)];
+			return item;
+		}
+		else return false;
+	}
+
+	getItems() {
+		var items = new Array();
+		for(var d in doggos) {
+			var item = this.getItem();
+			if(item) items.push(item);
+		}
+		return items;
+	}
+
+	run() {
+		return {
+			totalReward: this.generateReward(0),
+			item: this.getItems()
+		};
+	}
+}
+
+class Item {
+	constructor() {
+		console.log('yes');
+	}
+}
+
+class Doggo {
+	constructor(row) {
+		this.id = row.id;
+		this.name = row.name;
+		this.efficiency = efficiency;
+	}
+}
+
 module.exports = {
 	Manager : Manager,
 	BoosterManager : BoosterManager,
 	InventoryManager : InventoryManager,
 	DoggoManager : DoggoManager,
-	LootTable : LootTable
+	LootTable : LootTable,
+	Item : Item
 }
 
 module.exports.config = {

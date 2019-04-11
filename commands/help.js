@@ -41,7 +41,7 @@ module.exports.run = async(client, message, args) => {
 	else
 	{
 		fs.readdir("./commands/", (err, files) =>{
-			if(err) console.log(err);
+			if(err) console.error(err);
 			if(files.includes(`${args[0]}.js`))
 			{
 				var command = require(`./${args[0]}.js`);
