@@ -98,10 +98,12 @@ function initUser(userId) {
 	profiles.run("INSERT INTO Users(userId,level,xp,nextLevel,credits,bio) VALUES(?,?,?,?,?,?)",[userId,1,0,10,0,"I have no description yet."]);
 }
 
-loadGeneralCmds();
-loadWarframeCmds();
-loadMonsterHunterCmds();
-loadDatabases();
+function loadEverything(){
+	loadGeneralCmds();
+	loadWarframeCmds();
+	loadMonsterHunterCmds();
+	loadDatabases();
+}
 
 client.on("ready", () => {
 	console.log("beep boop i am working");
@@ -138,10 +140,7 @@ client.on("message", (message) => {
 
 	//Gestion du texte des messages
 	if(command === "reload") {
-		loadGeneralCmds();
-		loadWarframeCmds();
-		loadMonsterHunterCmds();
-		loadDatabases();
+		loadEverything();
 		message.channel.send(`meep morp commands and databases reloaded`);
 		console.log("===Commands fully reloaded===")
 	}
@@ -154,4 +153,4 @@ client.on("error", (error) => {
 	console.log(error.message);	
 });
 
-client.login(config.token);
+client.login(process.env.BOT_TOKEN);
